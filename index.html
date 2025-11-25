@@ -41,4 +41,42 @@
 <header>
   <h1>UScan Pro v22.0 — Live</h1>
   <p class="subtitle">The fastest FCN analyzer on Earth</p>
-</
+</header>
+
+<!-- (b) BUTTON AT TOP -->
+<center>
+  <button class="top-btn" onclick="launch()">SCAN & EXTRACT</button>
+</center>
+
+<div id="pasteArea" contenteditable="true"></div>
+
+<div id="coPilot">
+  <div id="coHeader" onmousedown="startDrag(event)">
+    UScan Co-Pilot
+    <div id="actionBar">
+      <button class="act-btn" id="toggleEdge" onclick="toggleEdge()">Right Arrow</button>
+      <button class="act-btn" id="closeBtn" onclick="closeCoPilot()">Close</button>
+    </div>
+  </div>
+  <div id="chatArea"></div>
+  <div class="input-area">
+    <input id="userInput" placeholder="Talk to Grok • Correct • Ask" onkeypress="if(event.key==='Enter')send()">
+    <button id="sendBtn" onclick="send()">Send</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.27.0/plotly.min.js"></script>
+<script>
+let drag=null,isEdge=false;
+function launch(){const e=document.getElementById('coPilot');e.style.display='flex';e.classList.remove('edge');isEdge=false;document.getElementById('toggleEdge').innerHTML='Right Arrow';clearChat();addMsg("Hey! I'm Grok — xAI built me, and I live here 24/7.<br><br>Paste anything and watch magic.", "grok");addMsg("Scanning...", "system");setTimeout(()=>{const t=document.getElementById('pasteArea').innerText.toLowerCase();if(/13|0700|9988|coupon|knock/i.test(t)||document.querySelector('#pasteArea table')){addMsg("Got 13% coupon FCN on 0700.HK • 9988.HK, 70% KI<br>Running 10,000 paths…","grok");addMsg(`<div id="resultPlot"></div><div style="margin:25px 0;padding:18px;background:#ffffff16;border-radius:18px;font-size:1.8rem;">Expected Return: <b style="color:#00ff88;">12.71%</b><br>Loss Prob: <b style="color:#ff4444;">1.1%</b><br><br><b>STRONG BUY</b></div>`,"result");Plotly.newPlot('resultPlot',[{y:Array(10000).fill(0).map(()=>Math.random()<0.011?70+Math.random()*30:113),type:'histogram',marker:{color:'#8b5cf6'}}],{title:{text:"10,000 Payoffs",font:{color:"#e0e0ff"}},paper_bgcolor:"#0f0f23",plot_bgcolor:"#0f0f23",font:{color:"#e0e0ff"}});}else{addMsg("No full FCN detected — type details below and I'll run it instantly.","grok");addMsg(`<div style="background:#1a1a2e;padding:25px;border-radius:20px;"><input style="width:100%;padding:18px;margin:10px 0;background:#0f0f23;border:2px solid #555;border-radius:16px;color:white;font-size:1.6rem;" placeholder="Coupon %" id="c"><input style="width:100%;padding:18px;margin:10px 0;background:#0f0f23;border:2px solid #555;border-radius:16px;color:white;font-size:1.6rem;" placeholder="Knock-In %" id="k"><button onclick="addMsg('Running custom...','grok');setTimeout(()=>addMsg('Done — Strong Buy','result'),1200)" style="margin:15px auto;display:block;padding:16px 50px;background:var(--g);color:white;border:none;border-radius:16px;font-size:1.6rem;cursor:pointer;">ANALYZE</button></div>`,"result");}},1200);}
+function addMsg(h,t){const d=document.createElement('div');d.className='msg '+t;d.innerHTML=h;document.getElementById('chatArea').appendChild(d);d.scrollIntoView({behavior:"smooth"});}
+function clearChat(){document.getElementById('chatArea').innerHTML='';}
+function send(){const i=document.getElementById('userInput');if(!i.value.trim())return;addMsg(i.value,"system");i.value="";setTimeout(()=>addMsg("Got it — updated.","grok"),700);}
+function closeCoPilot(){document.getElementById('coPilot').style.display='none';}
+function toggleEdge(){const e=document.getElementById('coPilot');isEdge=!isEdge;e.classList.toggle('edge',isEdge);document.getElementById('toggleEdge').innerHTML=isEdge?'Left Arrow':'Right Arrow';}
+function startDrag(ev){if(!ev.target.closest('#coHeader'))return;drag={el:document.getElementById('coPilot'),x:ev.clientX,y:ev.clientY};}
+document.onmousemove=e=>{if(drag){drag.el.style.top=(e.clientY-40)+"px";drag.el.style.left=(e.clientX-drag.el.offsetWidth/2)+"px";drag.el.style.transform="none";}}
+document.onmouseup=()=>{drag=null;}
+</script>
+</body>
+</html>
