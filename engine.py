@@ -19,4 +19,4 @@ knocked = np.any(worst < KI, axis=0)
 payoffs[knocked] = worst[-1, knocked] / S0.min()
 er = (payoffs.mean() - 1) * 100
 loss = (payoffs < 0.95).mean() * 100
-json.dumps({"er": round(float(er),2), "loss": round(float(loss),2), "payoffs": json.dumps(payoffs[:800].tolist())})
+json.dumps({"er": round(float(er),2), "loss": round(float(loss),2), "payoffs": payoffs[:800].tolist()})
