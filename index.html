@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>UScan Pro v25.7 — FINAL WEAPON</title>
+<title>UScan Pro v25.8 — FINAL CLEAN</title>
 <script src="https://cdn.jsdelivr.net/pyodide/v0.26.1/full/pyodide.js"></script>
 <style>
   :root{--p:#8b5cf6;--g:#10b981;--r:#ef4444;--bg:#0a0a1a}
@@ -23,7 +23,7 @@
 </head>
 <body>
 
-<header><h1>UScan Pro v25.7 — FINAL WEAPON</h1></header>
+<header><h1>UScan Pro v25.8 — FINAL CLEAN</h1></header>
 <center><button class="top-btn" id="scanBtn">SCAN & EXTRACT</button></center>
 <div id="pasteArea" contenteditable="true"></div>
 <button id="floatBtn">Right Arrow</button>
@@ -31,7 +31,7 @@
 <div id="coPilot">
   <div id="coHeader">UScan Co-Pilot</div>
   <div id="chatArea">
-    <div class="msg grok">Click SCAN to launch...</div>
+    <div class="msg grok">v25.8 loaded. Click SCAN to launch.</div>
   </div>
 </div>
 
@@ -48,28 +48,26 @@ function addMsg(text, type = "grok") {
 
 async function initPyodide() {
   if (pyodide) return;
-  addMsg("Loading Pyodide engine...", "grok");
+  addMsg("Loading Pyodide + yfinance...", "grok");
   pyodide = await loadPyodide();
   await pyodide.loadPackage(["numpy", "pandas", "micropip"]);
   await pyodide.runPythonAsync(`import micropip; await micropip.install('yfinance')`);
-  addMsg("Engine loaded.", "grok");
+  addMsg("Engine ready.", "grok");
 }
 
 document.getElementById("scanBtn").onclick = async () => {
   document.getElementById("coPilot").style.display = "flex";
   document.getElementById("floatBtn").style.display = "block";
-  document.getElementById("chatArea").innerHTML = "";
-  addMsg("Starting nuclear Monte Carlo...", "grok");
+  document.getElementById("chatArea").innerHTML = '<div class="msg grok">Launching Monte Carlo...</div>';
 
   await initPyodide();
 
-  const response = await fetch("engine.py");
-  if (!response.ok) {
-    addMsg(`ERROR: engine.py not found! (Status: ${response.status})`, "grok");
+  const resp = await fetch("engine.py?" + Date.now()); // cache buster
+  if (!resp.ok) {
+    addMsg("ERROR: engine.py not found!", "grok");
     return;
   }
-
-  const code = await response.text();
+  const code = await resp.text();
   addMsg("engine.py loaded. Running 10,000 paths...", "grok");
 
   try {
@@ -79,28 +77,32 @@ document.getElementById("scanBtn").onclick = async () => {
     addMsg(`
       Expected Return: <b style="color:#00ff88">+${data.er}%</b><br>
       Loss Probability: <b style="color:#ff4444">${data.loss}%</b><br><br>
-      <b>STRONG BUY — load the truck</b>
+      <b>STRONG BUY</b>
     `, "result");
 
-    addMsg(`
-      <div id="plot" style="width:100%;height:480px;"></div>
-      <script src="https://cdn.plot.ly/plotly-2.34.0.min.js"></script>
-      <script>
-        Plotly.newPlot("plot", [{
-          y: ${data.payoffs},
-          type: "histogram",
-          marker: {color: "#8b5cf6"}
-        }], {
-          title: {text: "10,000 Correlated Paths — v25.7", font: {color: "#e0e0ff"}},
-          paper_bgcolor: "#0f0f23",
-          plot_bgcolor: "#0f0f23",
-          font: {color: "#e0e0ff"}
-        }, {responsive: true});
-      </script>
-    `, "result");
+    const plotDiv = document.createElement("div");
+    plotDiv.style.width = "100%";
+    plotDiv.style.height = "480px";
+    document.getElementById("chatArea").appendChild(plotDiv);
+
+    const script = document.createElement("script");
+    script.src = "https://cdn.plot.ly/plotly-2.34.0.min.js";
+    script.onload = () => {
+      Plotly.newPlot(plotDiv, [{
+        y: data.payoffs,
+        type: "histogram",
+        marker: {color: "#8b5cf6"}
+      }], {
+        title: {text: "10,000 Correlated Paths — v25.8", font: {color: "#e0e0ff"}},
+        paper_bgcolor: "#0f0f23",
+        plot_bgcolor: "#0f0f23",
+        font: {color: "#e0e0ff"}
+      }, {responsive: true});
+    };
+    document.head.appendChild(script);
 
   } catch (e) {
-    addMsg(`Python execution failed: ${e.message}`, "grok");
+    addMsg("Python error: " + e.message, "grok");
   }
 };
 
