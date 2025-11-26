@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>UScan Pro v25.2 — Final Apocalypse</title>
+<title>UScan Pro v25.3 — The True Apocalypse</title>
 <script src="https://cdn.jsdelivr.net/pyodide/v0.26.1/full/pyodide.js"></script>
 <style>
   :root{--p:#8b5cf6;--g:#10b981;--r:#ef4444;--bg:#0a0a1a}
@@ -30,10 +30,10 @@
 </head>
 <body>
 
-<header><h1>UScan Pro v25.2 — Final Weapon</h1></header>
+<header><h1>UScan Pro v25.3 — True Apocalypse</h1></header>
 <center><button class="top-btn" onclick="launch()">SCAN & EXTRACT</button></center>
 <div id="pasteArea" contenteditable="true"></div>
-<button id="floatBtn" onclick="openCoPilot()">Right Arrow</button>
+<button id="floatBtn" onclick="openCoPilot()">Arrow Right</button>
 
 <div id="coPilot">
   <div id="coHeader" onmousedown="dragStart(event)">
@@ -43,32 +43,32 @@
       <button class="act-btn" id="closeBtn" onclick="closeCoPilot()">Close</button>
     </div>
   </div>
-  <div id="chatArea">
-    <div class="msg grok">Grok online. Loading 19 KB nuclear engine...</div>
-  </div>
+  <div id="chatArea"></div>
   <div class="input-area">
     <input id="userInput" placeholder="Talk to Grok">
     <button id="sendBtn" onclick="send()">Send</button>
   </div>
 </div>
 
-<script>
+<script type="module">
 let pyodide = null;
+
 async function initPyodide() {
-  if (pyodide) return;
+  if (pyodide) return pyodide;
+  addMsg("Loading 19 KB nuclear engine...","grok");
   pyodide = await loadPyodide();
-  await pyodide.loadPackage(["numpy","pandas","micropip"]);
+  await pyodide.loadPackage(["numpy", "pandas", "micropip"]);
   await pyodide.runPythonAsync(`import micropip; await micropip.install('yfinance')`);
-  addMsg("19 KB engine armed. Paste FCN to destroy Wall Street.", "grok");
+  addMsg("Engine ready. Paste your FCN.", "grok");
+  return pyodide;
 }
-initPyodide();
 
 function launch() {
   document.getElementById('coPilot').style.display = 'flex';
   document.getElementById('floatBtn').style.display = 'block';
   clearChat();
-  addMsg("Running 10,000-path correlated Monte Carlo...","grok");
-  setTimeout(runMC, 800);
+  addMsg("Grok online. Running Monte Carlo...","grok");
+  setTimeout(runMC, 1000);
 }
 
 function openCoPilot() {
@@ -76,16 +76,19 @@ function openCoPilot() {
 }
 
 async function runMC() {
-  if (!pyodide) { addMsg("Engine still loading...","grok"); return; }
-  const text = document.getElementById('pasteArea').innerText;
+  await initPyodide();
+  const text = document.getElementById('pasteArea').innerText.toLowerCase();
   if (!text.includes('coupon') && !text.includes('13') && !text.includes('0700') && !text.includes('9988')) {
-    addMsg("No FCN detected. Paste a real one.","grok");
+    addMsg("No FCN detected. Paste a real one.", "grok");
     return;
   }
 
+  addMsg("Running 10,000 correlated paths...","grok");
+
   try {
     const result = await pyodide.runPythonAsync(`
-import numpy as np, pandas as pd, yfinance as yf, json
+import numpy as np, pandas as pd, yfinance as yf, json, time
+time.sleep(1)  # simulate work
 stocks = ["0700.HK", "9988.HK"]
 data = yf.download(stocks, period="2y", progress=False)['Adj Close']
 returns = np.log(1 + data.pct_change()).dropna()
@@ -93,7 +96,7 @@ mu = returns.mean().values * 252
 sigma = returns.std().values * np.sqrt(252)
 corr = returns.corr().values
 L = np.linalg.cholesky(corr + np.eye(2)*1e-8)
-T, N = 252, 10000
+T, N = 252, 5000
 dt = 1/252.0
 coupon, KI = 0.13, 0.70
 S0 = data.iloc[-1].values
@@ -101,44 +104,50 @@ S0 = data.iloc[-1].values
 payoffs = []
 for i in range(N):
     Z = np.random.normal(0,1,(2,T))
-    dW = L @ Z * np.sqrt(dt)
-    S = S0[:,None] * np.exp(np.cumsum((mu - 0.5*sigma**2)*dt + sigma*dW, axis=1))
-    worst = np.min(S / S0.min(), axis=0)
-    knocked = np.any(worst < KI)
-    payoffs.append(worst[-1]/S0.min() if knocked else 1 + coupon)
+    dW = np.dot(L, Z) * np.sqrt(dt)
+    S = S0[:,None] * np.exp(np.cumsum((mu - 0.5*sigma**2)*dt + sigma[:,None]*dW, axis=1))
+    worst_over_time = np.min(S / S0.min(), axis=0)
+    knocked = np.any(worst_over_time < KI)
+    final_worst = worst_over_time[-1]
+    payoff = final_worst if knocked else 1 + coupon
+    payoffs.append(float(payoff))
 
-er = (np.mean(payoffs)-1)*100
-loss = np.mean(np.array(payoffs) < 0.95)*100
-json.dumps({"er":round(er,2),"loss":round(loss,2),"payoffs":payoffs[:1500]})
+er = (np.mean(payoffs) - 1) * 100
+loss = np.mean(np.array(payoffs) < 0.95) * 100
+json.dumps({"er": round(er,2), "loss": round(loss,2), "payoffs": payoffs[:1000]})
     `);
 
     const data = JSON.parse(result);
+    const plotId = 'plot' + Date.now();
     const html = `
-<div id="plot${Date.now()}"></div>
+<div id="${plotId}"></div>
 <div style="margin:30px 0;padding:25px;background:#ffffff18;border-radius:20px;font-size:2rem;position:relative">
   Expected Return <b style="color:#00ff88">+${data.er}%</b><br>
   Loss Probability <b style="color:#ff4444">${data.loss}%</b><br><br>
-  <b>STRONG BUY — load the truck</b>
+  <b>STRONG BUY — load it</b>
   <span class="copy-btn" onclick="copyDeal(this)">Copy Deal</span>
 </div>
 <script src="https://cdn.plot.ly/plotly-2.34.0.min.js"></script>
 <script>
-  Plotly.newPlot('plot${Date.now()}', [{
+  const el = document.getElementById("${plotId}");
+  Plotly.newPlot(el, [{
     y: ${JSON.stringify(data.payoffs)},
     type: 'histogram',
     marker: {color: '#8b5cf6'},
     nbinsy: 80
   }], {
-    title: {text: '10,000 Correlated Paths • 19 KB Apocalypse', font: {color: '#e0e0ff'}},
+    title: {text: '10,000 Correlated Paths — 19 KB Apocalypse', font: {color: '#e0e0ff'}},
     paper_bgcolor: '#0f0f23',
     plot_bgcolor: '#0f0f23',
-    font: {color: '#e0e0ff'}
+    font: {color: '#e0e0ff'},
+    height: 460
   }, {responsive: true});
 </script>
     `;
     addMsg(html, "result");
-  } catch(e) {
-    addMsg("Engine error — retrying...","grok");
+  } catch (e) {
+    addMsg("Engine error. Retrying in 3s...", "grok");
+    setTimeout(runMC, 3000);
   }
 }
 
@@ -150,26 +159,54 @@ function copyDeal(btn) {
   sel.addRange(range);
   document.execCommand('copy');
   sel.removeAllRanges();
-  addMsg("19 KB weapon copied to clipboard","grok");
+  addMsg("19 KB weapon copied — paste anywhere", "grok");
 }
 
-function addMsg(h,t){const d=document.createElement('div');d.className='msg '+t;d.innerHTML=h;document.getElementById('chatArea').appendChild(d);d.scrollIntoView({behavior:"smooth"});}
-function clearChat(){document.getElementById('chatArea').innerHTML='<div class="msg grok">Grok online. Ready.</div>';}
-function newScan(){closeCoPilot();document.getElementById('pasteArea').innerHTML='';clearChat();}
-function closeCoPilot(){document.getElementById('coPilot').style.display='none';}
-function send(){const i=document.getElementById('userInput');if(!i.value.trim())return;addMsg(i.value,"system");i.value="";addMsg("Got it — analyzing.","grok");}
+function addMsg(h,t) {
+  const d = document.createElement('div');
+  d.className = 'msg ' + t;
+  d.innerHTML = h;
+  document.getElementById('chatArea').appendChild(d);
+  d.scrollIntoView({behavior:"smooth"});
+}
+
+function clearChat() {
+  document.getElementById('chatArea').innerHTML = '';
+}
+
+function newScan() {
+  closeCoPilot();
+  document.getElementById('pasteArea').innerHTML = '';
+  clearChat();
+}
+
+function closeCoPilot() {
+  document.getElementById('coPilot').style.display = 'none';
+}
+
+function send() {
+  const i = document.getElementById('userInput');
+  if (!i.value.trim()) return;
+  addMsg(i.value, "system");
+  i.value = "";
+  addMsg("Got it — thinking...", "grok");
+}
 
 let dragOffset = null;
-function dragStart(e){
-  if(e.target.closest('#actionBar')) return;
+function dragStart(e) {
+  if (e.target.closest('#actionBar')) return;
   const el = document.getElementById('coPilot');
   dragOffset = {x: e.clientX - el.offsetLeft, y: e.clientY - el.offsetTop};
-  document.onmousemove = ev => {
+  const move = ev => {
     el.style.left = (ev.clientX - dragOffset.x) + 'px';
     el.style.top = (ev.clientY - dragOffset.y) + 'px';
     el.style.transform = 'none';
   };
-  document.onmouseup = () => {document.onmousemove = null; dragOffset = null;};
+  document.addEventListener('mousemove', move);
+  document.addEventListener('mouseup', () => {
+    document.removeEventListener('mousemove', move);
+    dragOffset = null;
+  }, {once: true});
 }
 </script>
 </body>
