@@ -2,107 +2,118 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>UScan Pro v25.8 — FINAL CLEAN</title>
+<title>UScan Pro v25.9 — WORKING</title>
 <script src="https://cdn.jsdelivr.net/pyodide/v0.26.1/full/pyodide.js"></script>
 <style>
-  :root{--p:#8b5cf6;--g:#10b981;--r:#ef4444;--bg:#0a0a1a}
-  body{font-family:Segoe UI,Arial;background:var(--bg);color:#e0e0ff;margin:0;overflow:hidden}
-  header{background:linear-gradient(135deg,#1e1b4b,#0f0f23);padding:20px;text-align:center}
-  h1{margin:0;font-size:2.9rem;background:linear-gradient(90deg,#8b5cf6,#00ff88);-webkit-background-clip:text;color:transparent;font-weight:900}
-  .top-btn{display:block;margin:30px auto;padding:28px 140px;font-size:2.7rem;background:var(--p);color:white;border:none;border-radius:40px;cursor:pointer;box-shadow:0 20px 70px rgba(139,92,246,.8)}
-  #pasteArea{margin:20px auto;width:90%;max-width:1200px;height:32vh;background:white;color:#000;border:9px solid var(--p);border-radius:40px;padding:45px;font-size:19px;overflow:auto;box-shadow:0 30px 90px rgba(0,0,0,.9)}
-  #pasteArea:empty:before{content:"Paste any FCN — table or text";color:#666;font-size:2.3rem;text-align:center;display:block;margin-top:10vh}
-  #floatBtn{position:fixed;right:22px;top:50%;transform:translateY(-50%);width:76px;height:76px;background:var(--p);color:white;border-radius:50%;border:none;font-size:2.6rem;cursor:pointer;z-index:999999;box-shadow:0 15px 60px rgba(139,92,246,1);display:none}
-  #coPilot{position:fixed;width:920px;height:93vh;max-width:96vw;max-height:96vh;background:var(--bg);border:11px solid var(--p);border-radius:46px;z-index:99999;box-shadow:0 0 350px rgba(139,92,246,1.4);display:none;flex-direction:column;left:50%;top:50%;transform:translate(-50%,-50%)}
-  #coHeader{background:var(--p);color:white;padding:24px 40px;font-size:2.3rem;font-weight:900}
-  #chatArea{flex:1;overflow-y:auto;padding:35px;background:#0f0f23}
-  .msg{max-width:86%;margin:22px 0;padding:24px 34px;border-radius:32px;font-size:1.9rem;line-height:1.9}
-  .grok{background:#1e1b4b;color:#00ff88;border-left:8px solid #00ff88;font-weight:bold}
-  .result{background:var(--g);color:white}
+  body{font-family:Segoe UI,Arial;background:#0a0a1a;color:#e0e0ff;margin:0;overflow:hidden}
+  header{background:#1e1b4b;padding:20px;text-align:center}
+  h1{margin:0;font-size:3rem;background:linear-gradient(90deg,#8b5cf6,#00ff88);-webkit-background-clip:text;color:transparent}
+  #scanBtn{display:block;margin:40px auto;padding:30px 160px;font-size:3rem;background:#8b5cf6;color:white;border:none;border-radius:50px;cursor:pointer;box-shadow:0 30px 80px rgba(139,92,246,.9)}
+  #pasteArea{margin:20px auto;width:90%;max-width:1200px;height:35vh;background:white;color:#000;border:12px solid #8b5cf6;border-radius:50px;padding:50px;font-size:20px;overflow:auto}
+  #pasteArea:empty:before{content:"Paste any FCN here";color:#999;font-size:2.5rem;text-align:center;display:block;margin-top:12vh}
+  #floatBtn{position:fixed;right:30px;top:50%;transform:translateY(-50%);width:80px;height:80px;background:#8b5cf6;color:white;border-radius:50%;font-size:3rem;cursor:pointer;z-index:9999;box-shadow:0 20px 60px rgba(139,92,246,1)}
+  #coPilot{position:fixed;inset:40px;background:#0f0f23;border:14px solid #8b5cf6;border-radius:50px;z-index:99999;display:none;flex-direction:column;box-shadow:0 0 400px rgba(139,92,246,1.5)}
+  #coHeader{background:#8b5cf6;color:white;padding:30px;font-size:2.8rem;text-align:center;font-weight:900}
+  #chatArea{flex:1;overflow-y:auto;padding:40px;background:#0f0f23}
+  .msg{margin:20px 0;padding:25px 35px;border-radius:35px;font-size:2rem;line-height:1.8}
+  .grok{background:#1e1b4b;color:#00ff88;border-left:10px solid #00ff88}
+  .result{background:#10b981;color:white}
+  .error{background:#7f1d1d;color:#ff6b6b}
 </style>
 </head>
 <body>
 
-<header><h1>UScan Pro v25.8 — FINAL CLEAN</h1></header>
-<center><button class="top-btn" id="scanBtn">SCAN & EXTRACT</button></center>
+<header><h1>UScan Pro v25.9</h1></header>
+<center><button id="scanBtn">SCAN & EXTRACT</button></center>
 <div id="pasteArea" contenteditable="true"></div>
-<button id="floatBtn">Right Arrow</button>
+<button id="floatBtn" style="display:none">Right Arrow</button>
 
 <div id="coPilot">
   <div id="coHeader">UScan Co-Pilot</div>
   <div id="chatArea">
-    <div class="msg grok">v25.8 loaded. Click SCAN to launch.</div>
+    <div class="msg grok">Ready. Click SCAN to launch.</div>
   </div>
 </div>
 
 <script type="module">
 let pyodide = null;
+let engineCode = null;
 
-function addMsg(text, type = "grok") {
+function log(msg, type="grok") {
   const div = document.createElement("div");
   div.className = "msg " + type;
-  div.innerHTML = text;
+  div.innerHTML = msg;
   document.getElementById("chatArea").appendChild(div);
-  div.scrollIntoView({behavior: "smooth"});
+  div.scrollIntoView({behavior:"smooth"});
 }
 
-async function initPyodide() {
-  if (pyodide) return;
-  addMsg("Loading Pyodide + yfinance...", "grok");
-  pyodide = await loadPyodide();
-  await pyodide.loadPackage(["numpy", "pandas", "micropip"]);
-  await pyodide.runPythonAsync(`import micropip; await micropip.install('yfinance')`);
-  addMsg("Engine ready.", "grok");
+async function loadPyodideSafe() {
+  if (pyodide) return true;
+  log("Loading Pyodide engine (this takes 5-10s first time)...", "grok");
+  try {
+    pyodide = await loadPyodide({indexURL: "https://cdn.jsdelivr.net/pyodide/v0.26.1/full/"});
+    log("Pyodide loaded.", "grok");
+    await pyodide.loadPackage(["numpy", "pandas", "micropip"]);
+    await pyodide.runPythonAsync(`import micropip; await micropip.install('yfinance')`);
+    log("yfinance ready.", "grok");
+    return true;
+  } catch (e) {
+    log("Pyodide failed: " + e.message + " — retrying in 5s...", "error");
+    setTimeout(loadPyodideSafe, 5000);
+    return false;
+  }
+}
+
+async function loadEngine() {
+  if (engineCode) return true;
+  log("Fetching engine.py...", "grok");
+  const r = await fetch("engine.py?t=" + Date.now());
+  if (!r.ok) {
+    log("ERROR: engine.py not found! Check GitHub upload.", "error");
+    return false;
+  }
+  engineCode = await r.text();
+  log("engine.py loaded.", "grok");
+  return true;
 }
 
 document.getElementById("scanBtn").onclick = async () => {
   document.getElementById("coPilot").style.display = "flex";
   document.getElementById("floatBtn").style.display = "block";
-  document.getElementById("chatArea").innerHTML = '<div class="msg grok">Launching Monte Carlo...</div>';
+  document.getElementById("chatArea").innerHTML = "";
+  log("Launching 19 KB nuclear Monte Carlo...", "grok");
 
-  await initPyodide();
+  const pyOk = await loadPyodideSafe();
+  if (!pyOk) return;
+  const engOk = await loadEngine();
+  if (!engOk) return;
 
-  const resp = await fetch("engine.py?" + Date.now()); // cache buster
-  if (!resp.ok) {
-    addMsg("ERROR: engine.py not found!", "grok");
-    return;
-  }
-  const code = await resp.text();
-  addMsg("engine.py loaded. Running 10,000 paths...", "grok");
+  log("Running 10,000 correlated paths...", "grok");
 
   try {
-    const output = await pyodide.runPythonAsync(code);
-    const data = JSON.parse(output);
+    const result = await pyodide.runPythonAsync(engineCode);
+    const data = JSON.parse(result);
 
-    addMsg(`
+    log(`
       Expected Return: <b style="color:#00ff88">+${data.er}%</b><br>
       Loss Probability: <b style="color:#ff4444">${data.loss}%</b><br><br>
-      <b>STRONG BUY</b>
+      <b style="font-size:2.5rem">STRONG BUY — LOAD IT</b>
     `, "result");
 
-    const plotDiv = document.createElement("div");
-    plotDiv.style.width = "100%";
-    plotDiv.style.height = "480px";
-    document.getElementById("chatArea").appendChild(plotDiv);
+    const plot = document.createElement("div");
+    plot.style.height = "500px";
+    document.getElementById("chatArea").appendChild(plot);
 
-    const script = document.createElement("script");
-    script.src = "https://cdn.plot.ly/plotly-2.34.0.min.js";
-    script.onload = () => {
-      Plotly.newPlot(plotDiv, [{
-        y: data.payoffs,
-        type: "histogram",
-        marker: {color: "#8b5cf6"}
-      }], {
-        title: {text: "10,000 Correlated Paths — v25.8", font: {color: "#e0e0ff"}},
-        paper_bgcolor: "#0f0f23",
-        plot_bgcolor: "#0f0f23",
-        font: {color: "#e0e0ff"}
-      }, {responsive: true});
-    };
-    document.head.appendChild(script);
+    const s = document.createElement("script");
+    s.src = "https://cdn.plot.ly/plotly-2.34.0.min.js";
+    s.onload = () => Plotly.newPlot(plot, [{y: data.payoffs, type: "histogram", marker: {color: "#8b5cf6"}}], {
+      title: {text: "10,000 Correlated Paths — v25.9", font: {color: "#e0e0ff"}},
+      paper_bgcolor: "#0f0f23", plot_bgcolor: "#0f0f23", font: {color: "#e0e0ff"}
+    }, {responsive: true});
+    document.head.appendChild(s);
 
   } catch (e) {
-    addMsg("Python error: " + e.message, "grok");
+    log("Engine failed: " + e.message, "error");
   }
 };
 
