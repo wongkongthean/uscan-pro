@@ -2,158 +2,174 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>UScan Pro v30.2-ALPHA</title>
+<title>UScan Pro v30.3-ALPHA</title>
 <style>
   :root{--p:#8b5cf6;--g:#10b981;--y:#fbbf24;--r:#ef4444;--bg:#0a0a1a}
-  body{font-family:Segoe UI,Arial;background:var(--bg);color:#e0e0ff;margin:0;overflow:hidden}
-  header{background:linear-gradient(135deg,#1e1b4b,#0f0f23);padding:20px;text-align:center;position:relative}
-  h1{margin:0;font-size:3.6rem;background:linear-gradient(90deg,#8b5cf6,#00ff88);-webkit-background-clip:text;color:transparent;font-weight:900}
-  .alpha-badge{position:absolute;top:15px;right:20px;background:#000c;padding:8px 20px;border:3px solid var(--p);border-radius:20px;font-size:1.4rem;font-weight:900}
-  .top-btn{display:block;margin:40px auto;padding:35px 220px;font-size:3.3rem;background:var(--p);color:white;border:none;border-radius:60px;cursor:pointer;box-shadow:0 40px 100px rgba(139,92,246,1)}
-  #pasteArea{margin:20px auto;width:90%;max-width:1200px;height:38vh;background:white;color:#000;border:16px solid var(--p);border-radius:60px;padding:60px;font-size:24px;overflow:auto}
-  #pasteArea:empty:before{content:"Paste one or more Fixed Coupon Notes → instant analysis";color:#666;font-size:2.6rem;text-align:center;display:block;margin-top:12vh}
-  #floatBtn{position:fixed;right:30px;bottom:30px;width:90px;height:90px;background:var(--p);color:white;border-radius:50%;font-size:4.5rem;cursor:pointer;z-index:999999;box-shadow:0 30px 80px rgba(139,92,246,1.4);border:none}
-  #coPilot{position:fixed;inset:30px;background:var(--bg);border:18px solid var(--p);border-radius:60px;z-index:99999;display:none;flex-direction:column;box-shadow:0 0 500px rgba(139,92,246,1.8);resize:both;overflow:hidden}
-  #coHeader{background:var(--p);color:white;padding:35px;font-size:3.5rem;text-align:center;font-weight:900;cursor:move}
-  #chatArea{flex:1;overflow-y:auto;padding:50px;background:#0f0f23}
-  .msg{margin:35px 0;padding:40px 50px;border-radius:50px;font-size:2.6rem;line-height:1.9}
-  .grok{background:#1e1b4b;color:#00ff88;border-left:14px solid #00ff88}
-  .result{background:#1e293b;color:#e0e0ff;border-left:8px solid var(--y);padding:40px}
-  .disclaimer{background:#7f1d1d;color:#ff6b6b;padding:25px;border-radius:20px;margin:40px 0;text-align:center;font-size:1.9rem}
-  .banner{background:#1e3a8a;color:#93c5fd;padding:20px;border-radius:20px;margin:30px 0;text-align:center;font-size:2.1rem}
+  body{font-family:Arial,Helvetica,sans-serif;background:#000;color:#ddd;margin:0;overflow:hidden;font-size:14px;line-height:1.4}
+  header{background:#111;padding:12px 20px;text-align:center;border-bottom:2px solid var(--p)}
+  h1{margin:0;font-size:22px;color:#fff;font-weight:normal}
+  .alpha-badge{position:absolute;top:10px;right:15px;background:#000;border:1px solid var(--p);padding:4px 10px;font-size:11px;letter-spacing:1px}
+  .top-btn{margin:20px auto;padding:14px 40px;font-size:16px;background:var(--p);color:#fff;border:none;border-radius:6px;cursor:pointer;display:block}
+  #pasteArea{margin:20px auto;width:94%;height:42vh;background:#111;color:#fff;border:2px solid #333;padding:16px;font-size:13px;overflow:auto;border-radius:6px}
+  #pasteArea:empty:before{content:"Paste Fixed Coupon Note(s) here...";color:#666;font-style:italic}
+  #floatBtn{position:fixed;right:20px;bottom:20px;width:56px;height:56px;background:var(--p);color:#fff;border-radius:50%;font-size:28px;border:none;cursor:pointer;z-index:9999;box-shadow:0 4px 20px rgba(139,92,246,.7)}
+  #arrowBtn{position:fixed;right:20px;top:50%;transform:translateY(-50%);width:48px;height:48px;background:#222;color:#aaa;border:2px solid #444;border-radius:50%;font-size:24px;cursor:pointer;z-index:9998}
+  #coPilot{position:fixed;inset:30px;background:#000;border:3px solid var(--p);border-radius:8px;z-index:99999;display:none;flex-direction:column;box-shadow:0 0 30px rgba(139,92,246,.5);resize:both;overflow:hidden}
+  #coHeader{background:var(--p);color:#fff;padding:10px;font-size:16px;text-align:center;cursor:move;font-weight:bold}
+  #chatArea{flex:1;overflow-y:auto;padding:16px;background:#111;font-size:13px}
+  .msg{margin:12px 0;padding:12px 16px;border-radius:6px}
+  .grok{background:#1a1a2e;color:#0f0}
+  .result{background:#1a1a2e;color:#ddd;border-left:3px solid var(--y)}
+  .disclaimer{background:#330000;color:#ff6b6b;padding:12px;border-radius:6px;margin:16px 0;font-size:12px;text-align:center}
   #confirmBox{position:fixed;inset:0;background:#000d;display:none;flex-direction:column;justify-content:center;align-items:center;z-index:999999}
-  #confirmInner{background:#1e1b4b;padding:50px;border-radius:50px;border:10px solid var(--p);width:600px;text-align:center}
-  .btn{padding:20px 60px;margin:20px;font-size:2.2rem;border:none;border-radius:40px;cursor:pointer}
-  .yes{background:var(--g);color:white}
-  .no{background:#666;color:white}
+  #confirmInner{background:#111;padding:30px;border-radius:8px;border:3px solid var(--p);width:720px;max-height:80vh;overflow-y:auto;color:#ddd}
+  .btn{padding:10px 24px;margin:8px;font-size:14px;border:none;border-radius:6px;cursor:pointer}
+  .yes{background:var(--g);color:#fff}
+  .no{background:#444;color:#fff}
+  .note-block{background:#1a1a2e;padding:12px;margin:12px 0;border-radius:6px;border-left:4px solid var(--p)}
 </style>
 </head>
 <body>
 
 <header>
-  <h1>UScan Pro <span style="font-size:2.8rem">v30.2-ALPHA</span></h1>
+  <h1>UScan Pro <span style="color:#aaa">v30.3-ALPHA</span></h1>
   <div class="alpha-badge">ALPHA</div>
 </header>
 
 <center><button class="top-btn" id="scanBtn">ANALYZE NOTES</button></center>
 <div id="pasteArea" contenteditable="true"></div>
-<button id="floatBtn" onclick="document.getElementById('coPilot').style.display='flex'">→</button>
+
+<button id="floatBtn" onclick="toggleCoPilot()">→</button>
+<button id="arrowBtn" onclick="toggleCoPilot()">→</button>
 
 <div id="coPilot">
-  <div id="coHeader">UScan Co-Pilot v30.2-ALPHA</div>
+  <div id="coHeader" onmousedown="dragStart(event)">UScan Co-Pilot v30.3-ALPHA</div>
   <div id="chatArea">
-    <div class="msg grok">v30.2-ALPHA ready — multi-note parser + confirmation</div>
-    <div class="banner">
-      Fixed Coupon Notes only • Full structured products suite coming Q1 2026
-    </div>
+    <div class="grok">Ready. Paste FCN(s) → mandatory confirmation → analysis.</div>
     <div class="disclaimer">
-      <b>EDUCATIONAL & RESEARCH TOOL ONLY</b><br>
-      Not investment advice • Not a registered advisor • For study and analysis only
+      EDUCATIONAL & RESEARCH TOOL ONLY • NOT INVESTMENT ADVICE • FOR STUDY PURPOSES ONLY
     </div>
   </div>
 </div>
 
 <div id="confirmBox">
   <div id="confirmInner">
-    <h2 style="color:var(--p);font-size:3rem">Incomplete Note Detected</h2>
-    <p style="font-size:2rem">We found a note but some fields are missing.<br>Continue with partial analysis?</p>
-    <button class="btn yes" onclick="confirmYes()">Yes, analyze</button>
-    <button class="btn no" onclick="confirmNo()">No, let me fix</button>
+    <h3 style="color:var(--p);margin-top:0">Confirm Analysis</h3>
+    <p>Please verify the parsed Fixed Coupon Notes below:</p>
+    <div id="confirmList"></div>
+    <div style="text-align:center;margin-top:20px">
+      <button class="btn yes" onclick="proceed()">Confirm & Analyze</button>
+      <button class="btn no" onclick="cancel()">Cancel</button>
+    </div>
   </div>
 </div>
 
 <script>
-// Neutral, professional rating scale
-function rateROI(roi){
-  if(roi >= 15) return {text:"Excellent", color:"#00ff88"};
-  if(roi >= 10) return {text:"Very Attractive", color:"#10b981"};
-  if(roi >= 5)  return {text:"Attractive", color:"#94d82d"};
-  if(roi >= 0)  return {text:"Neutral", color:"#fbbf24"};
-  if(roi >= -10) return {text:"Elevated Risk", color:"#f97316"};
-  return {text:"Highly Speculative", color:"#ef4444"};
+let parsedNotes = [];
+function toggleCoPilot(){
+  const cp = document.getElementById("coPilot");
+  cp.style.display = cp.style.display==="flex" ? "none" : "flex";
 }
 
-// Robust multi-FCN parser
+function rateROI(roi){
+  if(roi >= 15) return {text:"Excellent", color:"#0f0"};
+  if(roi >= 10) return {text:"Very Attractive", color:"#0f0"};
+  if(roi >= 5)  return {text:"Attractive", color:"#8f8"};
+  if(roi >= 0)  return {text:"Neutral", color:"#ff8"};
+  if(roi >= -10) return {text:"Elevated Risk", color:"#f80"};
+  return {text:"Highly Speculative", color:"#f00"};
+}
+
 function parseFCNs(text){
   const blocks = text.trim().split(/\n\s*\n/).map(b=>b.trim()).filter(b=>b);
   const notes = [];
   for(let block of blocks){
-    const lines = block.split('\n');
-    const note = {underlyings:[], tenor:null, strike:null, ki:null, ko:null, coupon:null, issuer:null};
-    for(let line of lines){
-      line = line.toLowerCase();
-      if(line.includes('tencent')||line.includes('700')) note.underlyings.push('0700.HK');
-      if(line.includes('baba')||line.includes('9988')) note.underlyings.push('9988.HK');
-      if(line.includes('byd')||line.includes('1211')) note.underlyings.push('1211.HK');
-      if(line.includes('geely')||line.includes('175')) note.underlyings.push('0175.HK');
-      if(line.includes('month')) note.tenor = parseInt(line.match(/\d+/)||[0]);
-      if(line.includes('strike')) note.strike = parseFloat(line.match(/\d+\.?\d*/)[0])/100;
-      if(line.includes('ki')) note.ki = parseFloat(line.match(/\d+\.?\d*/)[0])/100;
-      if(line.includes('ko')) note.ko = parseFloat(line.match(/\d+\.?\d*/)[0])/100;
-      if(line.includes('coupon')) note.coupon = parseFloat(line.match(/\d+\.?\d*/)[0])/100;
-      if(line.includes('issuer')) note.issuer = line.split(' ').pop().toUpperCase();
+    const lines = block.toLowerCase().split('\n');
+    const n = {underlyings:[], tenor:0, strike:null, ki:null, ko:null, coupon:null, issuer:null};
+    for(let l of lines){
+      if(l.includes('tencent')||l.includes('700')) n.underlyings.push('0700.HK');
+      if(l.includes('baba')||l.includes('9988')) n.underlyings.push('9988.HK');
+      if(l.includes('byd')||l.includes('1211')) n.underlyings.push('1211.HK');
+      if(l.includes('geely')||l.includes('175')) n.underlyings.push('0175.HK');
+      if(l.includes('month')) n.tenor = parseInt(l.match(/\d+/)||[0]);
+      if(l.includes('strike')) n.strike = parseFloat(l.match(/\d+\.?\d*/)[0])/100;
+      if(l.includes('ki ')) n.ki = parseFloat(l.match(/\d+\.?\d*/)[0])/100;
+      if(l.includes('ko ')) n.ko = parseFloat(l.match(/\d+\.?\d*/)[0])/100;
+      if(l.includes('coupon')) n.coupon = parseFloat(l.match(/\d+\.?\d*/)[0])/100;
+      if(l.includes('issuer')) n.issuer = l.split(' ').pop().toUpperCase();
     }
-    if(note.underlyings.length>0 && note.coupon && note.tenor) notes.push(note);
-    else if(note.underlyings.length>0) notes.push({...note, incomplete:true});
+    if(n.underlyings.length && n.coupon && n.tenor) notes.push(n);
   }
   return notes;
 }
 
-let pendingNotes = [];
-function confirmYes(){ document.getElementById("confirmBox").style.display="none"; showResults(pendingNotes); }
-function confirmNo(){ document.getElementById("confirmBox").style.display="none"; log("Analysis cancelled. Please correct and resubmit.", "grok"); }
+function analyze(){
+  const text = document.getElementById("pasteArea").innerText.trim();
+  if(text.length < 30) return;
+  parsedNotes = parseFCNs(text);
+  if(parsedNotes.length === 0){
+    log("No valid FCN detected.", "grok");
+    return;
+  }
+  showConfirmation();
+}
 
-function showResults(notes){
-  notes.forEach((note,i)=>{
-    const annualized = note.coupon * (note.tenor/12);
-    const rating = rateROI(annualized*100);
+function showConfirmation(){
+  const list = document.getElementById("confirmList");
+  list.innerHTML = "";
+  parsedNotes.forEach((n,i)=>{
+    const roi = n.coupon * (n.tenor/12) * 100;
+    const rating = rateROI(roi);
+    list.innerHTML += `
+      <div class="note-block">
+        <b>Note ${i+1}</b>: ${n.underlyings.join(' + ')}<br>
+        Tenor: ${n.tenor} mo | Coupon: ${(n.coupon*100).toFixed(1)}% p.a. → <span style="color:${rating.color}">${roi.toFixed(2)}% annualized</span><br>
+        Strike: ${n.strike? (n.strike*100).toFixed(1)+'%' : '—'} | KI: ${n.ki? (n.ki*100).toFixed(0)+'%' : '—'} | KO: ${n.ko? (n.ko*100).toFixed(0)+'%' : '—'} | Issuer: ${n.issuer||'—'}
+      </div>`;
+  });
+  document.getElementById("confirmBox").style.display = "flex";
+}
+
+function proceed(){
+  document.getElementById("confirmBox").style.display = "none";
+  document.getElementById("coPilot").style.display = "flex";
+  document.getElementById("chatArea").innerHTML = "";
+  log("Analysis confirmed by user.","grok");
+  parsedNotes.forEach((n,i)=>{
+    const roi = n.coupon * (n.tenor/12) * 100;
+    const rating = rateROI(roi);
     log(`
       <div class="result">
-        <b>Note ${i+1} — ${note.underlyings.join(' + ')}</b><br>
-        Tenor: ${note.tenor} months | Coupon: ${(note.coupon*100).toFixed(1)}% p.a.<br>
-        Annualized Yield: <b style="color:${rating.color}">${(annualized*100).toFixed(2)}%</b><br>
-        <b style="font-size:4.5rem;color:${rating.color}">${rating.text}</b><br>
-        Strike: ${note.strike? (note.strike*100).toFixed(1)+'%' : '—'} | 
-        KI: ${note.ki? (note.ki*100).toFixed(0)+'%' : '—'} | 
-        KO: ${note.ko? (note.ko*100).toFixed(0)+'%' : '—'} | 
-        Issuer: ${note.issuer||'—'}
-        ${note.incomplete?'<br><small style="color:#ff6b6b">Partial data — analysis limited</small>':''}
+        <b>Note ${i+1}</b> — ${n.underlyings.join(' + ')}<br>
+        ${n.tenor} months | ${(n.coupon*100).toFixed(1)}% p.a. coupon<br>
+        <b style="color:${rating.color}">Annualized Yield: ${roi.toFixed(2)}% → ${rating.text}</b>
       </div>
     `);
   });
 }
 
-function analyze(){
-  const text = document.getElementById("pasteArea").innerText.trim();
-  if(!text || text.length<30){
-    log("Please paste a valid Fixed Coupon Note.", "grok");
-    return;
-  }
-  document.getElementById("coPilot").style.display="flex";
-  document.getElementById("chatArea").innerHTML="";
-  log("Parsing input...","grok");
-
-  setTimeout(()=>{
-    const notes = parseFCNs(text);
-    if(notes.length===0){
-      log("No valid FCN detected. Please check format.", "grok");
-      return;
-    }
-    const incomplete = notes.filter(n=>n.incomplete);
-    pendingNotes = notes;
-    if(incomplete.length>0 && notes.length===incomplete.length){
-      document.getElementById("confirmBox").style.display="flex";
-    } else {
-      showResults(notes);
-    }
-  },600);
+function cancel(){
+  document.getElementById("confirmBox").style.display = "none";
+  log("Analysis cancelled by user.","grok");
 }
 
 function log(html,type="grok"){
   const d=document.createElement("div"); d.className="msg "+type;
   d.innerHTML=html; document.getElementById("chatArea").appendChild(d);
-  d.scrollIntoView({behavior:"smooth"});
+  d.scrollIntoView();
 }
+
+// Drag support
+let dragOffset=null;
+function dragStart(e){
+  if(e.target.tagName==="BUTTON") return;
+  const el=document.getElementById('coPilot');
+  dragOffset={x:e.clientX-el.offsetLeft,y:e.clientY-el.offsetTop};
+  const move=ev=>{el.style.left=(ev.clientX-dragOffset.x)+"px"; el.style.top=(ev.clientY-dragOffset.y)+"px"; el.style.transform="none";};
+  document.addEventListener("mousemove",move);
+  document.addEventListener("mouseup",()=>document.removeEventListener("mousemove",move),{once:true});
+}
+document.getElementById("coHeader").onmousedown=dragStart;
 
 document.getElementById("scanBtn").onclick=analyze;
 document.getElementById("pasteArea").addEventListener("paste",()=>setTimeout(analyze,800));
