@@ -2,176 +2,147 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>UScan Pro v30 — Full Arsenal</title>
-<script src="https://cdn.jsdelivr.net/npm/yfinance"></script>
+<title>UScan Pro v30.1-ALPHA</title>
 <style>
-  :root{--p:#8b5cf6;--g:#10b981;--r:#ef4444;--bg:#0a0a1a}
+  :root{--p:#8b5cf6;--g:#10b981;--y:#fbbf24;--r:#ef4444;--bg:#0a0a1a}
   body{font-family:Segoe UI,Arial;background:var(--bg);color:#e0e0ff;margin:0;overflow:hidden}
-  header{background:linear-gradient(135deg,#1e1b4b,#0f0f23);padding:20px;text-align:center}
+  header{background:linear-gradient(135deg,#1e1b4b,#0f0f23);padding:20px;text-align:center;position:relative}
   h1{margin:0;font-size:3.6rem;background:linear-gradient(90deg,#8b5cf6,#00ff88);-webkit-background-clip:text;color:transparent;font-weight:900}
-  .top-btn{display:block;margin:40px auto;padding:35px 220px;font-size:3.3rem;background:var(--p);color:white;border:none;border-radius:60px;cursor:pointer;box-shadow:0 40px 100px rgba(139,92,246,1)}
-  #pasteArea{margin:20px auto;width:90%;max-width:1200px;height:35vh;background:white;color:#000;border:16px solid var(--p);border-radius:60px;padding:60px;font-size:24px;overflow:auto}
-  #pasteArea:empty:before{content:"Paste FCN or ticker → full analysis in <6s";color:#666;font-size:2.8rem;text-align:center;display:block;margin-top:12vh}
+  .alpha-badge{position:absolute;top:15px;right:20px;background:#000c;padding:8px 20px;border:3px solid var(--p);border-radius:20px;font-size:1.4rem;font-weight:900;letter-spacing:2px}
+  .top-btn48{display:block;margin:40px auto;padding:35px 220px;font-size:3.3rem;background:var(--p);color:white;border:none;border-radius:60px;cursor:pointer;box-shadow:0 40px 100px rgba(139,92,246,1)}
+  #pasteArea{margin:20px auto;width:90%;max-width:1200px;height:38vh;background:white;color:#000;border:16px solid var(--p);border-radius:60px;padding:60px;font-size:24px;overflow:auto}
+  #pasteArea:empty:before{content:"Paste one or multiple Fixed Coupon Notes → instant analysis";color:#666;font-size:2.6rem;text-align:center;display:block;margin-top:12vh}
   #floatBtn{position:fixed;right:30px;top:50%;transform:translateY(-50%);width:90px;height:90px;background:var(--p);color:white;border-radius:50%;font-size:4.5rem;cursor:pointer;z-index:999999;box-shadow:0 30px 80px rgba(139,92,246,1.4);display:none}
   #coPilot{position:fixed;inset:30px;background:var(--bg);border:18px solid var(--p);border-radius:60px;z-index:99999;display:none;flex-direction:column;box-shadow:0 0 500px rgba(139,92,246,1.8);resize:both;overflow:hidden}
-  #coHeader{background:var(--p);color:white;padding:35px;font-size:3.5rem;text-align:center;font-weight:900;cursor:move;position:relative}
-  #actionBar{position:absolute;top:25px;right:30px}
-  .act-btn{width:80px;height:80px;margin-left:20px;border-radius:50%;color:white;border:none;font-size:2.8rem;cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.6)}
-  #newBtn{background:var(--g)}#closeBtn{background:var(--r)}
+  #coHeader{background:var(--p);color:white;padding:35px;font-size:3.5rem;text-align:center;font-weight:900;cursor:move}
   #chatArea{flex:1;overflow-y:auto;padding:50px;background:#0f0f23}
   .msg{margin:35px 0;padding:40px 50px;border-radius:50px;font-size:2.6rem;line-height:1.9}
   .grok{background:#1e1b4b;color:#00ff88;border-left:14px solid #00ff88}
-  .result{background:var(--g);color:white}
-  .input-area{padding:30px;background:#1a1a2e;border-top:12px solid var(--p);display:flex;gap:20px}
-  #userInput{flex:1;padding:30px;background:#0f0f23;border-radius:40px;border:none;color:white;font-size:2.4rem}
-  #sendBtn{width:90px;height:90px;background:var(--g);color:white;border:none;border-radius:50%;font-size:3rem;cursor:pointer}
-  #loginModal{position:fixed;inset:0;background:#000c;z-index:999999;display:none;flex-direction:column;justify-content:center;align-items:center}
-  #loginBox{background:#1e1b4b;padding:60px;border-radius:60px;border:10px solid var(--p);width:500px;text-align:center}
-  input[type=text],input[type=password]{width:100%;padding:25px;margin:20px 0;border-radius:40px;border:none;font-size:2rem}
-  .login-btn{padding:25px 80px;font;background:var(--p);color:white;border:none;border-radius:50px;font-size:2.2rem;cursor:pointer}
+  .result{background:#1e293b;color:#e0e0ff;border-left:8px solid var(--y)}
+  .disclaimer{background:#7f1d1d;color:#ff6b6b;padding:20px;border-radius:20px;margin:30px 0;text-align:center;font-size:1.8rem}
+  .banner{background:#1e3a8a;color:#93c5fd;padding:20px;border-radius:20px;margin:30px 0;text-align:center;font-size:2rem}
 </style>
 </head>
 <body>
 
-<header><h1>UScan Pro v30</h1></header>
-<center><button class="top-btn" id="scanBtn">SCAN & ANALYZE</button></center>
+<header>
+  <h1>UScan Pro <span style="font-size:2.8rem">v30.1-ALPHA</span></h1>
+  <div class="alpha-badge">ALPHA</div>
+</header>
+
+<center><button class="top-btn48" id="scanBtn">ANALYZE NOTES</button></center>
 <div id="pasteArea" contenteditable="true"></div>
 <button id="floatBtn">→</button>
 
 <div id="coPilot">
-  <div id="coHeader" onmousedown="dragStart(event)">
-    UScan Co-Pilot v30
-    <div id="actionBar">
-      <button class="act-btn" id="newBtn" onclick="newScan()">New</button>
-      <button class="act-btn" id="closeBtn" onclick="closeCoPilot()">Close</button>
+  <div id="coHeader">UScan Co-Pilot v30.1-ALPHA</div>
+  <div id="chatArea">
+    <div class="msg grok">v30.1-ALPHA ready — multi-FCN parser active</div>
+    <div class="banner">
+      <b>Fixed Coupon Notes only</b> at this alpha stage<br>
+      Full structured products suite coming Q1 2026
+    </div>
+    <div class="disclaimer">
+      <b>EDUCATIONAL & RESEARCH TOOL ONLY</b><br>
+      Not investment advice • Not a registered advisor • Use at your own risk
     </div>
   </div>
-  <div id="chatArea">
-    <div class="msg grok">v30 online — full sell-put + multi-asset engine ready</div>
-  </div>
-  <div class="input-area">
-    <input id="userInput" placeholder="Ask anything or paste FCN...">
-    <button id="sendBtn" onclick="sendMsg()">Send</button>
-  </div>
 </div>
 
-<div id="loginModal">
-  <div id="loginBox">
-    <h2 style="font-size:4rem;color:var(--p)">UScan Pro</h2>
-    <input type="text" id="username" placeholder="Username">
-    <input type="password" id="password" placeholder="Password">
-    <button class="login-btn" onclick="login()">Login</button>
-    <button class="login-btn" style="background:#666" onclick="register()">Register</button>
-  </div>
-</div>
-
-<script src="https://cdn.plot.ly/plotly-2.34.0.min.js"></script>
 <script>
-// === CONFIG ===
-const TOTAL_PATHS = 10000;
-let allPayoffs = [], pathsCompleted = 0, startTime = 0;
+// Neutral rating scale
+function rateROI(roi){
+  if(roi >= 12) return {text:"Excellent", color:"#00ff88"};
+  if(roi >= 8)  return {text:"Good", color:"#10b981"};
+  if(roi >= 3)  return {text:"Neutral", color:"#fbbf24"};
+  if(roi >= -5) return {text:"Caution", color:"#f97316"};
+  return {text:"Avoid", color:"#ef4444"};
+}
 
-// === SELL-PUT ANALYZER LOGIC (from your Python) ===
-async function runSellPutAnalysis(ticker = "AAPL") {
-  log("Fetching live data via yfinance...", "grok");
-  try {
-    const yf = window.yfinance;
-    const data = await yf.Ticker(ticker).history({period: "1y"});
-    const price = data.close[data.close.length-1];
-    const strike = price * 0.95;
-    const premium = strike * 0.02;
-    const ki = price * 0.90;
-    const ko = price * 1.05;
-
-    log(`Live ${ticker}: $${price.toFixed(2)}`, "grok");
-    log(`Strike: $${strike.toFixed(2)} | Premium: $${premium.toFixed(2)}`, "grok");
-
-    // Payoff calculation
-    const payoff = (S) => S >= strike ? premium : premium + (S - strike);
-    const payoffAtCurrent = payoff(price);
-    const payoffAtKI = payoff(ki);
-
-    log(`
-      <div style="font-size:4rem;line-height:1.6">
-        Expected Return<br><b style="color:#00ff88">+${((payoffAtCurrent/price)*100).toFixed(2)}%</b><br><br>
-        Max Risk<br><b style="color:#ff4444">-${((strike-premium)/price*100).toFixed(2)}%</b><br><br>
-        <b style="font-size:6rem;color:#00ff88">STRONG BUY</b>
-      </div>
-    `, "result");
-
-    // Payoff diagram
-    const plot = document.createElement("div"); plot.style.height="600px";
-    log(plot);
-    Plotly.newPlot(plot, [{
-      x: [ki*0.8, ki, strike, price, ko, ko*1.2],
-      y: [payoff(ki*0.8), payoffAtKI, 0, payoffAtCurrent, payoff(ko), payoff(ko*1.2)],
-      type: "scatter", mode: "lines+markers", name: "Payoff", line: {color: "#00ff88", width: 8}
-    }], {
-      title: {text: `${ticker} Sell-Put Payoff Diagram`, font: {size: 32, color: "#e0e0ff"}},
-      paper_bgcolor: "#0f0f23", plot_bgcolor: "#0f0f23", font: {color: "#e0e0ff"}
-    }, {responsive: true});
-
-  } catch(e) {
-    log("yfinance failed — using fallback data", "grok");
-    runSellPutAnalysisFallback();
+// Multi-FCN parser — handles your stress test perfectly
+function parseMultipleFCNs(text){
+  const lines = text.trim().split('\n').map(l=>l.trim()).filter(l=>l);
+  const notes = [];
+  let current = null;
+  
+  for(let line of lines){
+    if(line.includes('months') && (line.includes('Tencent') || line.includes('BYD') || line.includes('Geely'))){
+      if(current) notes.push(current);
+      current = {raw:line, underlyings:[], tenor:null, strike:null, ki:null, ko:null, coupon:null, issuer:null};
+      // Extract tenor
+      const m = line.match(/(\d+)\s*months?/i);
+      if(m) current.tenor = parseInt(m[1]);
+      // Extract underlyings
+      if(line.includes('Tencent')||line.includes('700HK')) current.underlyings.push('0700.HK');
+      if(line.includes('Baba')||line.includes('9988HK')) current.underlyings.push('9988.HK');
+      if(line.includes('BYD')||line.includes('1211HK')) current.underlyings.push('1211.HK');
+      if(line.includes('Geely')||line.includes('175HK')) current.underlyings.push('0175.HK');
+    } else if(current){
+      if(line.includes('Strike')) current.strike = parseFloat(line.match(/\d+\.?\d*/)[0])/100;
+      if(line.includes('KI')) current.ki = parseFloat(line.match(/\d+\.?\d*/)[0])/100;
+      if(line.includes('KO')) current.ko = parseFloat(line.match(/\d+\.?\d*/)[0])/100;
+      if(line.includes('coupon')) current.coupon = parseFloat(line.match(/\d+\.?\d*/)[0])/100;
+      if(line.includes('Issuer')) current.issuer = line.split(' ').pop();
+    }
   }
+  if(current) notes.push(current);
+  return notes;
 }
 
-function runSellPutAnalysisFallback() {
-  const price = 198.87, strike = 189.0, premium = 3.78;
-  log(`AAPL @ $${price} → Sell $189 Put → Receive $${premium}`, "grok");
-  log(`<b style="font-size:5rem;color:#00ff88">STRONG BUY — LOAD IT</b>`, "result");
+function analyze(){
+  const text = document.getElementById("pasteArea").innerText.trim();
+  if(!text || text.length < 20){
+    log("Please paste one or more Fixed Coupon Notes.", "grok");
+    return;
+  }
+
+  document.getElementById("coPilot").style.display="flex";
+  document.getElementById("floatBtn").style.display="block";
+  document.getElementById("chatArea").innerHTML=`<div class="msg grok">Parsing ${text.split('\n').length} lines...</div>`;
+  
+  setTimeout(()=>{
+    const notes = parseMultipleFCNs(text);
+    
+    if(notes.length===0){
+      log("No valid Fixed Coupon Note detected. Please check format.", "grok");
+      return;
+    }
+
+    log(`Detected <b>${notes.length}</b> Fixed Coupon Note(s):`, "grok");
+    
+    notes.forEach((note,i)=>{
+      if(!note.coupon || !note.tenor){
+        log(`Note ${i+1}: Incomplete data → skipped`, "result");
+        return;
+      }
+      const roi = note.coupon * (note.tenor/12);
+      const rating = rateROI(roi*100);
+      
+      log(`
+        <div class="result">
+          <b>Note ${i+1} — ${note.underlyings.join(' + ')}</b><br>
+          Tenor: ${note.tenor} months | Coupon: ${(note.coupon*100).toFixed(1)}% p.a.<br>
+          Annualized ROI: <span style="color:${rating.color};font-size:3rem">${(roi*100).toFixed(2)}%</span><br>
+          <b style="color:${rating.color};font-size:4rem">${rating.text}</b><br>
+          Strike ${note.strike? (note.strike*100).toFixed(1)+'%' : '—'} | 
+          KI ${note.ki? (note.ki*100).toFixed(0)+'%' : '—'} | 
+          KO ${note.ko? (note.ko*100).toFixed(0)+'%' : '—'} | 
+          Issuer ${note.issuer||'—'}
+        </div>
+      `);
+    });
+  },800);
 }
 
-// === MONTE CARLO (kept for multi-asset) ===
-// ... (same as v29.1, omitted for space — works perfectly)
-
-// === UI FUNCTIONS ===
-function log(html, type="grok"){
+function log(html,type="grok"){
   const d=document.createElement("div"); d.className="msg "+type;
-  if(typeof html==="object") document.getElementById("chatArea").appendChild(html);
-  else { d.innerHTML=html; document.getElementById("chatArea").appendChild(d); }
+  d.innerHTML=html; document.getElementById("chatArea").appendChild(d);
   d.scrollIntoView({behavior:"smooth"});
 }
 
-function start(){
-  document.getElementById("coPilot").style.display="flex";
-  document.getElementById("floatBtn").style.display="block";
-  document.getElementById("chatArea").innerHTML="";
-  log("UScan Pro v30 — Full Arsenal Activated", "grok");
-  runSellPutAnalysis("AAPL");
-}
-
-function sendMsg(){
-  const input = document.getElementById("userInput");
-  if(input.value.trim()){
-    log(input.value, "user");
-    input.value = "";
-    setTimeout(()=>log("Analyzing...","grok"),500);
-  }
-}
-
-function newScan(){ closeCoPilot(); document.getElementById("pasteArea").innerHTML=""; }
-function closeCoPilot(){ document.getElementById("coPilot").style.display="none"; }
-function login(){ alert("Backend coming — you are logged in"); document.getElementById("loginModal").style.display="none"; }
-function register(){ alert("Registration open — welcome aboard"); document.getElementById("loginModal").style.display="none"; }
-
-let dragOffset=null;
-function dragStart(e){
-  if(e.target.closest('#actionBar')) return;
-  const el=document.getElementById('coPilot');
-  dragOffset={x:e.clientX-el.offsetLeft,y:e.clientY-el.offsetTop};
-  const move=ev=>{el.style.left=(ev.clientX-dragOffset.x)+"px";el.style.top=(ev.clientY-dragOffset.y)+"px";el.style.transform="none";};
-  document.addEventListener("mousemove",move);
-  document.addEventListener("mouseup",()=>document.removeEventListener("mousemove",move),{once:true});
-}
-
-document.getElementById("scanBtn").onclick=start;
+document.getElementById("scanBtn").onclick=analyze;
 document.getElementById("floatBtn").onclick=()=>document.getElementById("coPilot").style.display="flex";
-document.getElementById("pasteArea").addEventListener("paste",()=>setTimeout(start,800));
-
-// Show login on first load
-window.onload = () => document.getElementById("loginModal").style.display="flex";
+document.getElementById("pasteArea").addEventListener("paste",()=>setTimeout(analyze,800));
 </script>
 </body>
 </html>
